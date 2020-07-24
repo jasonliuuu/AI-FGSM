@@ -19,4 +19,4 @@ Download the  [data](https://drive.google.com/open?id=1CfobY6i8BfqfWPHL31FKFDipN
 * `python simple_eval.py`:  evaluate the attack success rate under 8 models including normal training models and adversarial training models.
 
 ### Acknowledgements
-Code refer to [NAG attack](https://github.com/JHL-HUST/SI-NI-FGSM)
+Code refers to [NAG attack](https://github.com/JHL-HUST/SI-NI-FGSM)
