@@ -1,5 +1,7 @@
 # SI-AI-FGSM
+> 🚧 WIP
 
+Boosting adversarial attack with AdaGrad, AdaDelta, RMSProp, Adam and more... 
 ### Requirements 
 * Python 3.6.5
 * Tensorflow 1.12.0
