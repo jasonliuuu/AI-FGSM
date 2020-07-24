@@ -1,0 +1,15 @@
+name: adversarial-attack
+channels:
+  - defaults
+dependencies:
+  - python=3.6.5
+  - pandas
+  - matplotlib
+  - jupyterlab=1.2
+  - pylint
+  - pip
+  - pip:
+    - tensorflow==1.12.0
+    - numpy==1.15.4
+    - scipy==1.1.0
+    - opencv-python==3.4.2.16
