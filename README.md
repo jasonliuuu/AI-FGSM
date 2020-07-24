@@ -5,6 +5,8 @@
 * Tensorflow 1.12.0
 * Numpy 1.15.4
 * opencv-python 3.4.2.16
+* scipy 1.1.0
+
 ### Experiments
 Download the  [data](https://drive.google.com/open?id=1CfobY6i8BfqfWPHL31FKFDipNjqWwAhS) and [pretrained models](https://drive.google.com/open?id=10cFNVEhLpCatwECA6SPB-2g0q5zZyfaw)
 
