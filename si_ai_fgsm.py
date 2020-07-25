@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Implementation of AGI-FGSM (AdaGrad for I-FGSM) attack."""
+"""Implementation of SI-RI-FGSM (Scale-Invariant RMSProp Iterative Fast Gradient Sign Method)."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -31,6 +31,10 @@ tf.flags.DEFINE_float('max_epsilon', 16.0, 'max epsilon.')
 tf.flags.DEFINE_integer('num_iter', 10, 'max iteration.')
 
 # tf.flags.DEFINE_float('momentum', 1.0, 'momentum about the model.')
+
+tf.flags.DEFINE_float('beta_1',0.9,'decay factor of the accumulated squares of gradients?')
+
+tf.flags.DEFINE_float('beta_2',0.999,'decay factor of the accumulated squares of gradients?')
 
 tf.flags.DEFINE_integer(
     'image_width', 299, 'Width of each input images.')
@@ -136,16 +140,20 @@ def check_or_create_dir(directory):
         os.makedirs(directory)
 
 
-def graph(x, y, i, x_max, x_min, accum_grad):
+def graph(x, y, i, x_max, x_min, accum_s,accum_g):
     eps = 2.0 * FLAGS.max_epsilon / 255.0
     num_iter = FLAGS.num_iter
     alpha = eps / num_iter
     # momentum = FLAGS.momentum
     num_classes = 1001
+    beta_1 = FLAGS.beta_1
+    beta_2 = FLAGS.beta_2
+
+    x_nes = x
 
     with slim.arg_scope(inception_v3.inception_v3_arg_scope()):
         logits_v3, end_points_v3 = inception_v3.inception_v3(
-            x, num_classes=num_classes, is_training=False, reuse=tf.AUTO_REUSE)
+            x_nes, num_classes=num_classes, is_training=False, reuse=tf.AUTO_REUSE)
 
     pred = tf.argmax(end_points_v3['Predictions'], 1)
 
@@ -156,24 +164,58 @@ def graph(x, y, i, x_max, x_min, accum_grad):
     cross_entropy = tf.losses.softmax_cross_entropy(one_hot, logits_v3)
     grad = tf.gradients(cross_entropy, x)[0]
 
-    grad = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
+    x_nes_2 = 1 / 2 * x_nes
+    with slim.arg_scope(inception_v3.inception_v3_arg_scope()):
+        logits_v3_2, end_points_v3 = inception_v3.inception_v3(
+            x_nes_2, num_classes=num_classes, is_training=False, reuse=tf.AUTO_REUSE)
+    cross_entropy_2 = tf.losses.softmax_cross_entropy(one_hot, logits_v3_2)
+    grad += tf.gradients(cross_entropy_2, x)[0]
 
-    accum_grad = grad * grad + accum_grad
+    x_nes_4 = 1 / 4 * x_nes
+    with slim.arg_scope(inception_v3.inception_v3_arg_scope()):
+        logits_v3_4, end_points_v3 = inception_v3.inception_v3(
+            x_nes_4, num_classes=num_classes, is_training=False, reuse=tf.AUTO_REUSE)
+    cross_entropy_4 = tf.losses.softmax_cross_entropy(one_hot, logits_v3_4)
+    grad += tf.gradients(cross_entropy_4, x)[0]
 
-    x = x + alpha / tf.sqrt(accum_grad + 1e-6) * tf.sign(grad)
+    x_nes_8 = 1 / 8 * x_nes
+    with slim.arg_scope(inception_v3.inception_v3_arg_scope()):
+        logits_v3_8, end_points_v3 = inception_v3.inception_v3(
+            x_nes_8, num_classes=num_classes, is_training=False, reuse=tf.AUTO_REUSE)
+    cross_entropy_8 = tf.losses.softmax_cross_entropy(one_hot, logits_v3_8)
+    grad += tf.gradients(cross_entropy_8, x)[0]
+
+    x_nes_16 = 1 / 16 * x_nes
+    with slim.arg_scope(inception_v3.inception_v3_arg_scope()):
+        logits_v3_16, end_points_v3 = inception_v3.inception_v3(
+            x_nes_16, num_classes=num_classes, is_training=False, reuse=tf.AUTO_REUSE)
+    cross_entropy_16 = tf.losses.softmax_cross_entropy(one_hot, logits_v3_16)
+    grad += tf.gradients(cross_entropy_16, x)[0]
+
+    grad_normed = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
+
+    accum_g = grad_normed * (1-beta_1) + accum_g * beta_1
+
+    accum_s = grad * grad * (1-beta_2) + accum_s * beta_2
+
+    accum_g_hat = accum_g / (1 - beta_1 ** (i+1))
+
+    accum_s_hat = accum_s / (1 - beta_2 ** (i+1))
+
+    x = x + alpha / tf.add(tf.sqrt(accum_s_hat),1e-6) * tf.sign(accum_g_hat)
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 
-    return x, y, i, x_max, x_min, accum_grad
+    return x, y, i, x_max, x_min, accum_s, accum_g
 
 
-def stop(x, y, i, x_max, x_min, grad):
+def stop(x, y, i, x_max, x_min, accum_s,accum_g):
     num_iter = FLAGS.num_iter
     return tf.less(i, num_iter)
 
 
 def image_augmentation(x):
-    # img, noise
+    # img, grad
     one = tf.fill([tf.shape(x)[0], 1], 1.)
     zero = tf.fill([tf.shape(x)[0], 1], 0.)
     transforms = tf.concat([one, zero, zero, zero, one, zero, zero, zero], axis=1)
@@ -226,9 +268,10 @@ def main(_):
 
         y = tf.constant(np.zeros([FLAGS.batch_size]), tf.int64)
         i = tf.constant(0)
-        accum_grad = tf.zeros(shape=batch_shape)
+        accum_s = tf.zeros(shape=batch_shape)
+        accum_g = tf.zeros(shape=batch_shape)
 
-        x_adv, _, _, _, _, _ = tf.while_loop(stop, graph, [x_input, y, i, x_max, x_min, accum_grad])
+        x_adv, _, _, _, _, _, _ = tf.while_loop(stop, graph, [x_input, y, i, x_max, x_min, accum_s, accum_g])
 
         # Run computation
         s1 = tf.train.Saver(slim.get_model_variables(scope='InceptionV3'))
