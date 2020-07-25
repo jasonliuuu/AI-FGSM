@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Implementation of RI-FGSM (RMSProp for I-FGSM) attack."""
+"""Implementation of RI-FGSM (RMSProp Iterative Fast Gradient Sign Method) attack."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -162,9 +162,9 @@ def graph(x, y, i, x_max, x_min, accum_s,accum_g):
     cross_entropy = tf.losses.softmax_cross_entropy(one_hot, logits_v3)
     grad = tf.gradients(cross_entropy, x)[0]
 
-    grad_normed = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
+    grad = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
 
-    accum_g = grad_normed * (1-beta_1) + accum_g * beta_1
+    accum_g = grad * (1-beta_1) + accum_g * beta_1
 
     accum_s = grad * grad * (1-beta_2) + accum_s * beta_2
 
