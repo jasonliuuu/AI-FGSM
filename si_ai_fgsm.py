@@ -102,6 +102,7 @@ def load_images(input_dir, batch_shape):
     idx = 0
     batch_size = batch_shape[0]
     for filepath in tf.gfile.Glob(os.path.join(input_dir, '*')):
+        # filepath = filepath[:100]
         with tf.gfile.Open(filepath, 'rb') as f:
             image = imread(f, mode='RGB').astype(np.float) / 255.0
         # Images for inception classifier are normalized to be in [-1, 1] interval.
@@ -192,17 +193,17 @@ def graph(x, y, i, x_max, x_min, accum_s,accum_g):
     cross_entropy_16 = tf.losses.softmax_cross_entropy(one_hot, logits_v3_16)
     grad += tf.gradients(cross_entropy_16, x)[0]
 
-    grad = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
+    grad_normed = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
 
-    accum_g = grad * (1-beta_1) + accum_g * beta_1
+    accum_g = grad_normed * (1-beta_1) + accum_g * beta_1
 
-    accum_s = grad * grad * (1-beta_2) + accum_s * beta_2
+    accum_s = tf.multiply(grad,grad) * (1-beta_2) + accum_s * beta_2
 
-    accum_g_hat = accum_g / (1 - beta_1 ** (i+1))
+    accum_g_hat = tf.divide(accum_g,(1 - tf.pow(beta_1,tf.cast(i+1,tf.float32))))
 
-    accum_s_hat = accum_s / (1 - beta_2 ** (i+1))
+    accum_s_hat = tf.divide(accum_s,(1 - tf.pow(beta_2,tf.cast(i+1,tf.float32))))
 
-    x = x + alpha / tf.add(tf.sqrt(accum_s_hat),1e-6) * tf.sign(accum_g_hat)
+    x = x + tf.multiply(tf.divide(alpha,tf.add(tf.sqrt(accum_s_hat),1e-6)),tf.sign(accum_g_hat))
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 

@@ -194,17 +194,17 @@ def graph(x, y, i, x_max, x_min, accum_s,accum_g):
 
     grad = tf.nn.depthwise_conv2d(grad, stack_kernel, strides=[1, 1, 1, 1], padding='SAME')
 
-    grad = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
+    grad_normed = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
 
-    accum_g = grad * (1-beta_1) + accum_g * beta_1
+    accum_g = grad_normed * (1-beta_1) + accum_g * beta_1
 
-    accum_s = grad * grad * (1-beta_2) + accum_s * beta_2
+    accum_s = tf.multiply(grad,grad) * (1-beta_2) + accum_s * beta_2
 
-    accum_g_hat = accum_g / (1 - beta_1 ** (i+1))
+    accum_g_hat = tf.divide(accum_g,(1 - tf.pow(beta_1,tf.cast(i+1,tf.float32))))
 
-    accum_s_hat = accum_s / (1 - beta_2 ** (i+1))
+    accum_s_hat = tf.divide(accum_s,(1 - tf.pow(beta_2,tf.cast(i+1,tf.float32))))
 
-    x = x + alpha / tf.add(tf.sqrt(accum_s_hat),1e-6) * tf.sign(accum_g_hat)
+    x = x + tf.multiply(tf.divide(alpha,tf.add(tf.sqrt(accum_s_hat),1e-6)),tf.sign(accum_g_hat))
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 
