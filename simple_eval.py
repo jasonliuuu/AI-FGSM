@@ -122,4 +122,4 @@ if __name__ == '__main__':
                             success_count[i] += 1
             print("if this number is high and like 1000 we have a problem",idx)
             for i in range(len(model_name)):
-                print("Attack Success Rate for {0} : {1:.1f}%".format(model_name[i], success_count[i] / IMAGE_NUM. * 100))
+                print("Attack Success Rate for {0} : {1:.1f}%".format(model_name[i], success_count[i] / IMAGE_NUM * 100))

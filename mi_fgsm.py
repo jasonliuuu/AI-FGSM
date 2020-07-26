@@ -24,37 +24,6 @@ import random
 
 from fgsmutils import *
 
-slim = tf.contrib.slim
-
-tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
-
-tf.flags.DEFINE_float('max_epsilon', 16.0, 'max epsilon.')
-
-tf.flags.DEFINE_integer('num_iter', 10, 'max iteration.')
-
-tf.flags.DEFINE_float('momentum', 1.0, 'momentum about the model.')
-
-tf.flags.DEFINE_integer(
-    'image_width', 299, 'Width of each input images.')
-
-tf.flags.DEFINE_integer(
-    'image_height', 299, 'Height of each input images.')
-
-tf.flags.DEFINE_float('prob', 0.5, 'probability of using diverse inputs.')
-
-tf.flags.DEFINE_integer('image_resize', 331, 'Height of each input images.')
-
-tf.flags.DEFINE_string('checkpoint_path', './models',
-                       'Path to checkpoint for pretained models.')
-
-tf.flags.DEFINE_string('input_dir', './dev_data/val_rs',
-                       'Input directory with images.')
-
-tf.flags.DEFINE_string('output_dir', './outputs',
-                       'Output directory with images.')
-
-FLAGS = tf.flags.FLAGS
-
 np.random.seed(0)
 tf.set_random_seed(0)
 random.seed(0)
