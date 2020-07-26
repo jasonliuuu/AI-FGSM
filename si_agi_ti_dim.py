@@ -188,11 +188,11 @@ def graph(x, y, i, x_max, x_min, accum_grad):
 
     grad = tf.nn.depthwise_conv2d(grad, stack_kernel, strides=[1, 1, 1, 1], padding='SAME')
 
-    grad = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
+    grad_normed = grad / tf.reduce_mean(tf.abs(grad), [1, 2, 3], keep_dims=True)
 
-    accum_grad = accum_grad + grad * grad
+    accum_grad = accum_grad + tf.multiply(grad,grad)
 
-    x = x + alpha / tf.sqrt(accum_grad + 1e-6) * tf.sign(grad)
+    x = x + tf.divide(alpha,tf.sqrt(accum_grad + 1e-6)) * tf.sign(grad_normed)
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 
