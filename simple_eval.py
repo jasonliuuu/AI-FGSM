@@ -8,6 +8,10 @@ import tensorflow as tf
 from scipy.misc import imread, imresize, imsave
 import pandas as pd
 from nets import inception_v3, inception_v4, inception_resnet_v2, resnet_v2
+from fgsmutils import *
+
+
+
 
 slim = tf.contrib.slim
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -24,50 +28,13 @@ model_checkpoint_map = {
     'resnet_v2': os.path.join(checkpoint_path, 'resnet_v2_101.ckpt')}
 
 
-def load_labels(file_name):
-    dev = pd.read_csv(file_name)
-    f2l = {dev.iloc[i]['filename']: dev.iloc[i]['label'] for i in range(len(dev))}
-    return f2l
-
-
-def load_images(input_dir, batch_shape):
-    """Read png images from input directory in batches.
-    Args:
-      input_dir: input directory
-      batch_shape: shape of minibatch array, i.e. [batch_size, height, width, 3]
-    Yields:
-      filenames: list file names without path of each image
-        Lenght of this list could be less than batch_size, in this case only
-        first few images of the result are elements of the minibatch.
-      images: array with all images from this batch
-    """
-    images = np.zeros(batch_shape)
-    filenames = []
-    idx = 0
-    batch_size = batch_shape[0]
-    for filepath in tf.gfile.Glob(os.path.join(input_dir, '*')):
-        with tf.gfile.Open(filepath, 'rb') as f:
-            image = imread(f, mode='RGB').astype(np.float) / 255.0
-        # Images for inception classifier are normalized to be in [-1, 1] interval.
-        images[idx, :, :, :] = image * 2.0 - 1.0
-        filenames.append(os.path.basename(filepath))
-        idx += 1
-        if idx == batch_size:
-            yield filenames, images
-            filenames = []
-            images = np.zeros(batch_shape)
-            idx = 0
-    if idx > 0:
-        yield filenames, images
-
-
 if __name__ == '__main__':
     f2l = load_labels('./dev_data/val_rs.csv')
     input_dir = './outputs'
 
     batch_shape = [50, 299, 299, 3]
     num_classes = 1001
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.ERROR)
 
     with tf.Graph().as_default():
         x_input = tf.placeholder(tf.float32, shape=batch_shape)
@@ -153,6 +120,6 @@ if __name__ == '__main__':
                     for i in range(len(model_name)):
                         if l[i] != label:
                             success_count[i] += 1
-
+            print("if this number is high and like 1000 we have a problem",idx)
             for i in range(len(model_name)):
-                print("Attack Success Rate for {0} : {1:.1f}%".format(model_name[i], success_count[i] / 1000. * 100))
+                print("Attack Success Rate for {0} : {1:.1f}%".format(model_name[i], success_count[i] / IMAGE_NUM * 100))
