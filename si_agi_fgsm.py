@@ -186,11 +186,11 @@ def graph(x, y, i, x_max, x_min, accum_grad):
     cross_entropy_16 = tf.losses.softmax_cross_entropy(one_hot, logits_v3_16)
     noise += tf.gradients(cross_entropy_16, x)[0]
 
-    noise = noise / tf.reduce_mean(tf.abs(noise), [1, 2, 3], keep_dims=True)
+    noise_normed = noise / tf.reduce_mean(tf.abs(noise), [1, 2, 3], keep_dims=True)
 
     accum_grad = accum_grad + noise * noise
 
-    x = x + alpha / tf.sqrt(accum_grad + 1e-6) * tf.sign(noise)
+    x = x + tf.multiply(tf.divide(alpha,tf.sqrt(accum_grad + 1e-6)),tf.sign(noise_normed))
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 
