@@ -162,7 +162,7 @@ def graph(x, y, i, x_max, x_min, accum_grad):
 
     accum_grad = tf.multiply(grad,grad) * (1-gamma) + accum_grad * gamma
 
-    x = x + tf.multiply(tf.divide(alpha,tf.sqrt(accum_grad + 1e-6)),tf.sign(grad_normed))
+    x = x + tf.multiply(tf.divide(alpha,tf.sqrt(tf.add(accum_grad,1e-6))),tf.sign(grad_normed))
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 
