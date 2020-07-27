@@ -18,10 +18,10 @@ Download the  [data](https://drive.google.com/open?id=1CfobY6i8BfqfWPHL31FKFDipN
 * `python ai_fgsm.py` to generate adversarial examples for inception_v3 using AI-FGSM;
 * `python si_agi_fgsm.py` to generate adversarial examples for inception_v3 using SI-AGI-FGSM;
 * `python si_ri_fgsm.py` to generate adversarial examples for inception_v3 using SI-RI-FGSM;
-* 'python si_ai_fgsm.py' to generate adversarial examples for inception_v3 using SI-AI-FGSM;
-* 'python si_agi_ti_dim.py' to generate adversarial examples for inception_v3 using SI-AGI-TI-DIM;
-* 'python si_ri_ti_dim.py' to generate adversarial examples for inception_v3 using SI-RI-TI-DIM;
-* 'python si_ai_ti_dim.py' to generate adversarial examples for inception_v3 using SI-AI-TI-DIM;
+* `python si_ai_fgsm.py` to generate adversarial examples for inception_v3 using SI-AI-FGSM;
+* `python si_agi_ti_dim.py` to generate adversarial examples for inception_v3 using SI-AGI-TI-DIM;
+* `python si_ri_ti_dim.py` to generate adversarial examples for inception_v3 using SI-RI-TI-DIM;
+* `python si_ai_ti_dim.py` to generate adversarial examples for inception_v3 using SI-AI-TI-DIM;
 * `python simple_eval.py`:  evaluate the attack success rate under 8 models including normal training models and adversarial training models.
 
 ### Acknowledgements
