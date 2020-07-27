@@ -191,9 +191,9 @@ def graph(x, y, i, x_max, x_min, accum_grad):
 
     noise_normed = noise / tf.reduce_mean(tf.abs(noise), [1, 2, 3], keep_dims=True)
 
-    accum_grad = gamma * accum_grad + (1-gamma) * tf.multiply(noise,noise)
+    accum_grad = gamma * accum_grad + (1-gamma) * tf.multiply(noise, noise)
 
-    x = x + tf.multiply(tf.divide(alpha,tf.sqrt(tf.add(accum_grad,1e-6))),tf.sign(noise_normed))
+    x = x + tf.multiply(tf.divide(alpha, tf.sqrt(tf.add(accum_grad, 1e-6))), tf.sign(noise_normed))
     x = tf.clip_by_value(x, x_min, x_max)
     i = tf.add(i, 1)
 
