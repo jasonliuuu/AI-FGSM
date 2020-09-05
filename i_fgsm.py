@@ -26,11 +26,9 @@ slim = tf.contrib.slim
 
 tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
 
-tf.flags.DEFINE_float('max_epsilon', 16.0, 'max epsilon.')
+tf.flags.DEFINE_float('max_epsilon', 25.5, 'max epsilon.')
 
 tf.flags.DEFINE_integer('num_iter', 10, 'max iteration.')
-
-tf.flags.DEFINE_float('momentum', 1.0, 'momentum about the model.')
 
 tf.flags.DEFINE_integer(
     'image_width', 299, 'Width of each input images.')
@@ -140,7 +138,7 @@ def graph(x, y, i, x_max, x_min, grad):
     eps = 2.0 * FLAGS.max_epsilon / 255.0
     num_iter = FLAGS.num_iter
     alpha = eps / num_iter
-    momentum = FLAGS.momentum
+    # momentum = FLAGS.momentum
     num_classes = 1001
 
     with slim.arg_scope(inception_v3.inception_v3_arg_scope()):
@@ -156,9 +154,9 @@ def graph(x, y, i, x_max, x_min, grad):
     cross_entropy = tf.losses.softmax_cross_entropy(one_hot, logits_v3)
     noise = tf.gradients(cross_entropy, x)[0]
 
-    noise = noise / tf.reduce_mean(tf.abs(noise), [1, 2, 3], keep_dims=True)
+    # noise = noise / tf.reduce_mean(tf.abs(noise), [1, 2, 3], keep_dims=True)
 
-    noise = momentum * grad + noise
+    # noise = momentum * grad + noise
 
     x = x + alpha * tf.sign(noise)
     x = tf.clip_by_value(x, x_min, x_max)
