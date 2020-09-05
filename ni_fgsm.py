@@ -49,7 +49,7 @@ tf.flags.DEFINE_string('input_dir', './dev_data/val_rs',
                        'Input directory with images.')
 
 tf.flags.DEFINE_string('output_dir', './outputs',
-                       'Output directory with images.')
+                       Output directory with images.')
 
 FLAGS = tf.flags.FLAGS
 
