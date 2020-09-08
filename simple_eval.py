@@ -28,7 +28,7 @@ model_checkpoint_map = {
     'resnet_v2': os.path.join(checkpoint_path, 'resnet_v2_101.ckpt')}
 
 
-if __name__ == '__main__':
+def run():
     f2l = load_labels('./dev_data/val_rs.csv')
     input_dir = './outputs'
 
@@ -123,3 +123,6 @@ if __name__ == '__main__':
             print("if this number is high and like 1000 we have a problem",idx)
             for i in range(len(model_name)):
                 print("Attack Success Rate for {0} : {1:.1f}%".format(model_name[i], success_count[i] / IMAGE_NUM * 100))
+
+if __name__ == '__main__':
+  run()
