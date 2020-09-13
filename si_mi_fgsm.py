@@ -22,6 +22,16 @@ from nets import inception_v3, inception_v4, inception_resnet_v2, resnet_v2
 
 import random
 
+import simple_eval
+
+def del_all_flags(FLAGS):
+    flags_dict = FLAGS._flags()
+    keys_list = [keys for keys in flags_dict]
+    for keys in keys_list:
+        FLAGS.__delattr__(keys)
+
+del_all_flags(tf.flags.FLAGS)
+
 slim = tf.contrib.slim
 
 tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
@@ -292,7 +302,7 @@ def main(_):
                 l2_diff += np.mean(np.linalg.norm(np.reshape(diff, [-1, 3]), axis=1))
 
             print('{:.2f}'.format(l2_diff * FLAGS.batch_size / 1000))
-
+            simple_eval.run()
 
 def load_labels(file_name):
     import pandas as pd

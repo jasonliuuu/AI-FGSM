@@ -22,11 +22,21 @@ from nets import inception_v3, inception_v4, inception_resnet_v2, resnet_v2
 
 import random
 
+import simple_eval
+
+def del_all_flags(FLAGS):
+    flags_dict = FLAGS._flags()
+    keys_list = [keys for keys in flags_dict]
+    for keys in keys_list:
+        FLAGS.__delattr__(keys)
+
+del_all_flags(tf.flags.FLAGS)
+
 slim = tf.contrib.slim
 
 tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
 
-tf.flags.DEFINE_float('max_epsilon', 8.0, 'max epsilon.')
+tf.flags.DEFINE_float('max_epsilon', 10.0, 'max epsilon.')
 
 tf.flags.DEFINE_integer('num_iter', 10, 'max iteration.')
 
@@ -143,7 +153,7 @@ def check_or_create_dir(directory):
 def graph(x, y, i, x_max, x_min, accum_s,accum_g):
     eps = 2.0 * FLAGS.max_epsilon / 255.0
     num_iter = FLAGS.num_iter
-    alpha = 0.1
+    alpha = eps / num_iter
     # momentum = FLAGS.momentum
     num_classes = 1001
     beta_1 = FLAGS.beta_1
@@ -303,8 +313,6 @@ def main(_):
             l2_diff = 0
             for filenames, images in load_images(FLAGS.input_dir, batch_shape):
                 idx = idx + 1
-                if idx == 2:
-                  break
                 print("start the i={} attack".format(idx))
 
                 adv_images = sess.run(x_adv, feed_dict={x_input: images})
@@ -313,6 +321,7 @@ def main(_):
                 l2_diff += np.mean(np.linalg.norm(np.reshape(diff, [-1, 3]), axis=1))
 
             print('{:.2f}'.format(l2_diff * FLAGS.batch_size / 1000))
+            simple_eval.run()
 
 
 def load_labels(file_name):

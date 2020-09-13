@@ -26,7 +26,7 @@ slim = tf.contrib.slim
 
 tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
 
-tf.flags.DEFINE_float('max_epsilon', 25.5, 'max epsilon.')
+tf.flags.DEFINE_float('max_epsilon', 10.0, 'max epsilon.')
 
 tf.flags.DEFINE_integer('num_iter', 10, 'max iteration.')
 
@@ -262,7 +262,7 @@ def main(_):
                 l2_diff += np.mean(np.linalg.norm(np.reshape(diff, [-1, 3]), axis=1))
 
             print('{:.2f}'.format(l2_diff * FLAGS.batch_size / 1000))
-
+            simple_eval.run()
 
 def load_labels(file_name):
     import pandas as pd

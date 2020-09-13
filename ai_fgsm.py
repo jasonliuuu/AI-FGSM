@@ -26,7 +26,7 @@ slim = tf.contrib.slim
 
 tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
 
-tf.flags.DEFINE_float('max_epsilon', 16.0, 'max epsilon.')
+tf.flags.DEFINE_float('max_epsilon', 10.0, 'max epsilon.')
 
 tf.flags.DEFINE_integer('num_iter', 10, 'max iteration.')
 
