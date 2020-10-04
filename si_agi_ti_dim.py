@@ -34,16 +34,6 @@ del_all_flags(tf.flags.FLAGS)
 
 slim = tf.contrib.slim
 
-import simple_eval
-
-def del_all_flags(FLAGS):
-    flags_dict = FLAGS._flags()
-    keys_list = [keys for keys in flags_dict]
-    for keys in keys_list:
-        FLAGS.__delattr__(keys)
-
-del_all_flags(tf.flags.FLAGS)
-
 tf.flags.DEFINE_integer('batch_size', 10, 'How many images process at one time.')
 
 tf.flags.DEFINE_float('max_epsilon', 10.0, 'max epsilon.')
